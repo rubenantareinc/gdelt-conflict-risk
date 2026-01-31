@@ -3,7 +3,7 @@
 This project is an **exploratory, cross-sectional** analysis of country-level indicators and their association with **future conflict events** in selected Middle East contexts.
 It uses a **manual Ordinary Least Squares (OLS)** implementation (closed-form solution + coefficient inference) to keep the modeling transparent.
 
-> ✅ Important: this repo is **not** a time-series / city-month GDELT pipeline. It is included as a separate, related modeling artifact.
+> * Important: this repo is **not** a time-series / city-month GDELT pipeline. It is included as a separate, related modeling artifact.*
 
 ## What's inside
 
