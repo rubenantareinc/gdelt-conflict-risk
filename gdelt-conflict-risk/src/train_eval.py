@@ -15,6 +15,7 @@ For real experiments, replace the toy data with GDELT-derived articles/events.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -124,9 +125,12 @@ def main():
     outdir.mkdir(parents=True, exist_ok=True)
     res_df = pd.DataFrame([r.__dict__ for r in results])
     res_df.to_csv(outdir / "ablation_time_split_metrics.csv", index=False)
+    with (outdir / "ablation_time_split_metrics.json").open("w", encoding="utf-8") as f:
+        json.dump(res_df.to_dict(orient="records"), f, indent=2)
 
     print(res_df.to_string(index=False))
     print(f"Saved: {outdir / 'ablation_time_split_metrics.csv'}")
+    print(f"Saved: {outdir / 'ablation_time_split_metrics.json'}")
 
 
 if __name__ == "__main__":
