@@ -1,62 +1,91 @@
-# GDELT Conflict Risk — Toy, Reproducible Pipeline with Leakage Demo
+# SpaceX Starship Incident Dataset & Pipeline (Offline, Reproducible)
 
-This repository is a compact, **offline-runnable** research scaffold for city-month conflict risk modeling using GDELT-style news text. It emphasizes **reproducibility**, **time-aware evaluation**, and a concrete **data leakage discovery**: the failure mode where improper aggregation leaks future-month text into earlier samples.
+This repository provides a **fully offline**, reproducible pipeline for labeling and evaluating Starship incident narratives. It ships a **small, checked-in dataset** of incident narratives (25 incidents) so reviewers can run everything without network access, then scale using their own additional sources.
 
-The project ships a **toy dataset** so every command runs without external downloads. You can swap in real GDELT-derived exports when ready (see [Data](#data)).
+## Project goals
 
-## Why this repo (narrative alignment)
+- Build a labeled incident dataset with transparent provenance.
+- Make labeling consistent and reproducible.
+- Provide evaluation that scales as the dataset grows.
 
-- **Data leakage discovery:** `src/leakage_demo.py` demonstrates how city-level aggregation can leak future text into past labels when copied across months, and shows the correct city-month aggregation instead.
-- **Time-aware splits:** both the main pipeline and leakage demo use month-based splits to avoid look-ahead bias.
-- **Feature ablations:** the training script runs text-only, numeric-only, and combined feature sets to compare contribution.
-- **Reproducible and offline:** a small toy dataset and deterministic outputs keep experiments runnable and reviewable.
+## Dataset snapshot (checked in)
 
-## Quickstart
+- **Incidents:** 25 narratives in `data/processed/incidents.jsonl`.
+- **Labels:** 25 labeled incidents in `data/labels.csv`.
+- **Raw narratives:** `data/raw_text/{source_id}.txt`.
+- **Sources registry:** `data/sources.csv` (with explicit URL placeholders when missing).
+
+> ⚠️ The current sources include **explicit missing URLs** and short provenance notes. Replace them with verified URLs and summaries when you expand the dataset.
+
+## Data statement
+
+- **Sources:** Public narratives (official updates, webcasts, or press coverage). The repo ships **cleaned incident narratives**, not full webpages.
+- **Scope:** A small subset is included for offline reproducibility; the pipeline supports scaling by adding new sources and raw text.
+- **Provenance:** Each incident retains a `source_id`, `url` (or `MISSING`), `retrieved_date` (optional), and a short `source_summary`.
+
+## Reproduce in 3 commands
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Ablations with a time-aware split
-python src/train_eval.py --train_end_month 2024-02
-
-# Demonstrate the leakage failure mode vs the correct aggregation
-python src/leakage_demo.py --train_end_month 2024-02
+python src/ingest/build_dataset.py
+python src/baselines/empty_baseline.py
+python src/evaluation/evaluate_labels.py
 ```
 
-Outputs are written to `outputs/`:
-- `outputs/ablation_time_split_metrics.csv`
-- `outputs/ablation_time_split_metrics.json`
-- `outputs/leakage_demo_metrics.csv`
+Outputs:
+- `outputs/metrics.json`
+- `outputs/metrics.md`
+- `outputs/predictions.csv`
 
-## Data
+## Labeling workflow
 
-Toy data (already included):
-- `data/toy_articles.csv` — article-level text with dates and locations
-- `data/toy_city_month_labels.csv` — city-month labels
+- Run the interactive label tool:
 
-To use real GDELT-derived data, replace `data/toy_articles.csv` with a CSV that matches the expected schema (columns: `date, city, text, numeric_refugees_m, numeric_gdp_growth`). The helper `src/download_gdelt.py` can bootstrap a CSV from the GDELT Doc API, but it **does not resolve true city names**; it records a coarse `location_raw` and uses source country as a placeholder `city` field. For city-level modeling, insert a proper geocoding step.
+```bash
+python src/labeling/label_tool.py --resume
+```
 
-## Entry points
+- Label definitions and consistency rules: `docs/LABEL_GUIDE.md`.
 
-- `src/train_eval.py` — end-to-end pipeline: city-month documents → TF-IDF + numeric cues → ablations → time-aware evaluation
-- `src/leakage_demo.py` — minimal demonstration of the leakage pattern and why time-aware splits matter
-- `src/download_gdelt.py` — optional helper for downloading GDELT Doc API results (requires geocoding for real city-level work)
+## Scaling the dataset (no scraping in this environment)
 
-## Documentation
+1. Add source metadata to `data/sources.csv`.
+2. Add narrative text to `data/raw_text/{source_id}.txt` or provide a CSV with columns `source_id,incident_name,date,text`.
+3. Rebuild the dataset:
 
-- `docs/LEAKAGE_ANALYSIS.md` — explains the leakage mechanism and the correct aggregation approach
-- `docs/ABLATION_STUDY.md` — documents implemented ablations and how to read metrics
-- `QUICKSTART.md` — step-by-step setup and expected outputs
-- `CONTRIBUTING.md` — lightweight contribution guide
+```bash
+python src/ingest/build_dataset.py --raw-dir data/raw_text --sources-csv data/sources.csv
+```
 
-## Scope and non-claims
+## Incident cards
 
-- ✅ Implements city-month document construction, TF-IDF features, ablations, and time-aware evaluation.
-- ✅ Demonstrates a real leakage failure mode caused by incorrect aggregation logic.
-- ❌ Does **not** ship large-scale GDELT datasets.
-- ❌ Does **not** claim production forecasting performance or external validity.
+The smoke test generates a sample incident card at:
+
+- `outputs/incident_cards/incident_spx-001.md`
+
+## Repository layout
+
+```
+data/
+  raw_text/                # Narrative text (one file per source_id)
+  processed/incidents.jsonl
+  labels.csv
+  sources.csv
+  schema.yaml
+  schema.json
+src/
+  ingest/build_dataset.py
+  labeling/label_tool.py
+  baselines/empty_baseline.py
+  evaluation/evaluate_labels.py
+scripts/
+  smoke_end_to_end.py
+```
+
+## Notes on honesty and reproducibility
+
+- No web scraping is performed in this environment.
+- URLs are left blank or explicitly marked as `MISSING` when unknown.
+- Labels are assigned only from text evidence and can be refined when sources are expanded.
 
 ## License
 

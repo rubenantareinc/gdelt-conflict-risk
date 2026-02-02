@@ -1,0 +1,91 @@
+version: 1
+entity: incident
+required_fields:
+  - incident_id
+  - incident_name
+  - text
+  - sources
+fields:
+  incident_id:
+    type: string
+  incident_name:
+    type: string
+  date:
+    type: string
+    description: Optional ISO date (YYYY-MM-DD).
+  text:
+    type: string
+    description: Cleaned narrative text for the incident.
+  sources:
+    type: list
+    description: Provenance records for the narrative.
+    items:
+      source_id: string
+      url: string
+      title: string
+      retrieved_date: string
+      source_summary: string
+  labels:
+    type: object
+    description: Gold labels if available.
+    fields:
+      subsystem:
+        type: list
+        allowed:
+          - propulsion
+          - structures
+          - avionics
+          - guidance_navigation_control
+          - thermal_protection
+          - ground_support
+          - flight_termination
+          - software
+          - communications
+          - power
+          - recovery
+          - operations
+          - unspecified
+      failure_mode:
+        type: list
+        allowed:
+          - engine_failure
+          - pressurization_failure
+          - structural_failure
+          - fire
+          - explosion
+          - loss_of_control
+          - separation_failure
+          - landing_failure
+          - ignition_abort
+          - telemetry_loss
+          - pad_damage
+          - debris_impact
+          - thermal_damage
+          - propellant_leak
+          - valve_failure
+          - sensor_failure
+          - abort
+      impact:
+        type: list
+        allowed:
+          - vehicle_loss
+          - booster_loss
+          - ship_loss
+          - pad_damage
+          - test_abort
+          - mission_loss
+          - partial_damage
+          - safe_abort
+          - successful_recovery
+      cause:
+        type: list
+        allowed:
+          - unknown
+          - design_issue
+          - manufacturing_defect
+          - operational_error
+          - environmental
+          - hypothesis_only
+  notes:
+    type: string
+    description: Optional free-text notes about labeling.

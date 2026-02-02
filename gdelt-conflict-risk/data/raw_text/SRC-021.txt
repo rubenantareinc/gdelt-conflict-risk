@@ -1,0 +1,1 @@
+A sensor fault was detected during preflight checks, triggering an automated abort before engine ignition.
