@@ -11,6 +11,10 @@ Usage example:
 Notes:
 - GDELT returns JSON; results may be rate-limited.
 - You may need to paginate (this script includes simple paging).
+- The Doc API does not provide reliable city-level geocoding. We therefore store
+  `location_raw` and set `city` to a coarse proxy (source country). For true
+  city-level modeling, replace `city` after running a geocoder or using GDELT
+  GKG/location fields.
 """
 from __future__ import annotations
 
@@ -54,11 +58,13 @@ def main():
             break
 
         for a in articles:
+            source_country = a.get("sourceCountry") or ""
             all_rows.append(
                 {
                     "date": a.get("seendate"),
-                    "city": "",  # TODO: map location via GKG/geo or your own resolver
-                    "country": a.get("sourceCountry"),
+                    "city": source_country,
+                    "country": source_country,
+                    "location_raw": source_country,
                     "text": (a.get("title","") + " " + a.get("seendate","") + " " + a.get("url","")).strip(),
                 }
             )

@@ -1,16 +1,15 @@
-# City-Level Conflict Risk from News Text Signals (GDELT-style)
+# GDELT Conflict Risk — Toy, Reproducible Pipeline with Leakage Demo
 
-This repository implements an end-to-end **city-month text** pipeline for conflict-risk modeling:
-1) collect articles for a place and time window (e.g., via **GDELT**),
-2) build **city-month documents**,
-3) extract **TF-IDF text features** plus simple **numeric cues**,
-4) run **ablations** (text-only vs numeric-only vs combined),
-5) evaluate with **time-aware splits**.
+This repository is a compact, **offline-runnable** research scaffold for city-month conflict risk modeling using GDELT-style news text. It emphasizes **reproducibility**, **time-aware evaluation**, and a concrete **data leakage discovery**: the failure mode where improper aggregation leaks future-month text into earlier samples.
 
-Because application review and reproducibility matter, this repo also includes a **leakage demonstration**:
-a small script that shows how an *improper aggregation* (city-level docs copied into each month) can leak future text into earlier examples.
+The project ships a **toy dataset** so every command runs without external downloads. You can swap in real GDELT-derived exports when ready (see [Data](#data)).
 
-> Note: This repo includes a **toy dataset** so everything runs offline. Swap in real GDELT-derived data for real experiments.
+## Why this repo (narrative alignment)
+
+- **Data leakage discovery:** `src/leakage_demo.py` demonstrates how city-level aggregation can leak future text into past labels when copied across months, and shows the correct city-month aggregation instead.
+- **Time-aware splits:** both the main pipeline and leakage demo use month-based splits to avoid look-ahead bias.
+- **Feature ablations:** the training script runs text-only, numeric-only, and combined feature sets to compare contribution.
+- **Reproducible and offline:** a small toy dataset and deterministic outputs keep experiments runnable and reviewable.
 
 ## Quickstart
 
@@ -26,23 +25,39 @@ python src/train_eval.py --train_end_month 2024-02
 python src/leakage_demo.py --train_end_month 2024-02
 ```
 
-Outputs are written to `outputs/`.
+Outputs are written to `outputs/`:
+- `outputs/ablation_time_split_metrics.csv`
+- `outputs/ablation_time_split_metrics.json`
+- `outputs/leakage_demo_metrics.csv`
 
 ## Data
 
-- `data/toy_articles.csv` — article-level text with dates and locations (toy)
-- `data/toy_city_month_labels.csv` — city-month target labels (toy)
+Toy data (already included):
+- `data/toy_articles.csv` — article-level text with dates and locations
+- `data/toy_city_month_labels.csv` — city-month labels
 
-For real data, replace `toy_articles.csv` with a file exported from your own GDELT query (same schema: `date, city, text, ...`).
+To use real GDELT-derived data, replace `data/toy_articles.csv` with a CSV that matches the expected schema (columns: `date, city, text, numeric_refugees_m, numeric_gdp_growth`). The helper `src/download_gdelt.py` can bootstrap a CSV from the GDELT Doc API, but it **does not resolve true city names**; it records a coarse `location_raw` and uses source country as a placeholder `city` field. For city-level modeling, insert a proper geocoding step.
 
-## What to look at
+## Entry points
 
-- `src/train_eval.py` — full pipeline + ablation + time-aware evaluation
-- `src/leakage_demo.py` — demonstrates the leakage bug pattern and why time splits matter
+- `src/train_eval.py` — end-to-end pipeline: city-month documents → TF-IDF + numeric cues → ablations → time-aware evaluation
+- `src/leakage_demo.py` — minimal demonstration of the leakage pattern and why time-aware splits matter
+- `src/download_gdelt.py` — optional helper for downloading GDELT Doc API results (requires geocoding for real city-level work)
 
-## What this repo claims (and what it doesn't)
+## Documentation
 
-- ✅ Implements city-month document construction + TF-IDF features + ablations + time-aware split evaluation.
-- ✅ Demonstrates a common leakage pattern caused by improper aggregation logic.
-- ❌ Does not ship large-scale GDELT datasets inside the repo (download/export them separately).
-- ❌ Does not claim production forecasting performance or universal causal conclusions.
+- `docs/LEAKAGE_ANALYSIS.md` — explains the leakage mechanism and the correct aggregation approach
+- `docs/ABLATION_STUDY.md` — documents implemented ablations and how to read metrics
+- `QUICKSTART.md` — step-by-step setup and expected outputs
+- `CONTRIBUTING.md` — lightweight contribution guide
+
+## Scope and non-claims
+
+- ✅ Implements city-month document construction, TF-IDF features, ablations, and time-aware evaluation.
+- ✅ Demonstrates a real leakage failure mode caused by incorrect aggregation logic.
+- ❌ Does **not** ship large-scale GDELT datasets.
+- ❌ Does **not** claim production forecasting performance or external validity.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
