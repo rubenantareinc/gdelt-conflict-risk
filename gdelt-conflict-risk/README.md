@@ -51,13 +51,16 @@ To use real GDELT-derived data, replace `data/toy_articles.csv` with a CSV that 
 - `QUICKSTART.md` — step-by-step setup and expected outputs
 - `CONTRIBUTING.md` — lightweight contribution guide
 
-## Scope and non-claims
+## What this project does 
 
 - ✅ Implements city-month document construction, TF-IDF features, ablations, and time-aware evaluation.
 - ✅ Demonstrates a real leakage failure mode caused by incorrect aggregation logic.
+
+## What this project doesn't do 
+
 - ❌ Does **not** ship large-scale GDELT datasets.
 - ❌ Does **not** claim production forecasting performance or external validity.
-
+  
 ## License
 
 MIT. See [LICENSE](LICENSE).
