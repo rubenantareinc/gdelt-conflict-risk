@@ -53,13 +53,13 @@ To use real GDELT-derived data, replace `data/toy_articles.csv` with a CSV that 
 
 ## What this project does 
 
-- ✅ Implements city-month document construction, TF-IDF features, ablations, and time-aware evaluation.
-- ✅ Demonstrates a real leakage failure mode caused by incorrect aggregation logic.
+-  Implements city-month document construction, TF-IDF features, ablations, and time-aware evaluation.
+-  Demonstrates a real leakage failure mode caused by incorrect aggregation logic.
 
 ## What this project doesn't do 
 
-- ❌ Does **not** ship large-scale GDELT datasets.
-- ❌ Does **not** claim production forecasting performance or external validity.
+-  Does **not** ship large-scale GDELT datasets.
+-  Does **not** claim production forecasting performance or external validity.
   
 ## License
 
